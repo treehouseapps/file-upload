@@ -3,11 +3,12 @@ const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
 const multer = require("multer");
+const path = require("path");
 const { v2: cloudinary } = require("cloudinary");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 app.set("view engine", "ejs");
-
+app.set("views", path.join(__dirname, "views"));
 // Connect to MongoDB
 mongoose.connect(process.env.DBCONNECTION, { useNewUrlParser: true, useUnifiedTopology: true });
 
