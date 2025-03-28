@@ -1,7 +1,6 @@
 const upload = require('../utils/multer')
 const mongoModel = require('../utils/mongodb')
 const cloudinary = require('../utils/cloudinary')
-const path = require('path');
 const stream = require('stream');
 // Get All Files
 const home = async (req, res) => {
@@ -9,6 +8,9 @@ const home = async (req, res) => {
     res.render("index", { files });
 }
 
+const uploadPage = async (req, res) => {
+    res.render("upload");
+}
 const view = async (req, res) => {
     const retrive = await mongoModel.find()
     res.json({ data: retrive })
@@ -68,30 +70,32 @@ const uploadFile = (req, res) => {
     });
 };
 
-const uploadPage = async (req, res) => {
-    res.render("upload");
+// Delete FIles
+const deleteFile = async (req, res) => {
+    console.log(req.body);
+
+    const imageUrl = req.body.img;  // Image URL in the request body
+    const publicId = imageUrl.split('/').slice(-2).join('/').split('.')[0];   // Extract public ID
+
+    console.log('Public ID to delete:', publicId);  // Debugging line
+
+    try {
+        const result = await cloudinary.uploader.destroy(publicId);
+        console.log('Cloudinary delete result:', result);
+
+        if (result.result === 'ok') {
+            return res.json({ success: true, message: "Image deleted successfully" });
+        } else {
+            return res.status(404).json({ success: false, message: "Image not found" });
+        }
+    } catch (error) {
+        console.error('Error deleting image:', error);
+        res.status(500).json({ success: false, message: "Failed to delete image", error });
+    }
 }
 
-module.exports = { home, uploadFile, view, uploadPage };
+
+module.exports = { home, uploadFile, view, uploadPage, deleteFile };
 
 
 
-// // Delete FIles
-// app.post("/delete/:id", async (req, res) => {
-//     console.log(req.body)
-//     const { id } = req.body; // Get _id from request body
-
-//     try {
-//         const result = await cloudinary.uploader.destroy(id);
-//         console.log(result);
-//         res.json({ success: true, message: "Image deleted successfully" });
-//     } catch (error) {
-//         res.status(500).json({ success: false, message: "Failed to delete image", error });
-//     }
-// })
-// app.get('/delete', async (req, res) => {
-//     cloud.uploader
-//         .destroy('uploads/sample')
-//         // cloudinary.uploader.destroy('uploads/sample')
-//         .then(result => console.log(result));
-// })
