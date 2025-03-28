@@ -9,6 +9,8 @@ const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
+app.use(express.urlencoded({ extended: true }));
+
 // Connect to MongoDB
 mongoose.connect(process.env.DBCONNECTION, { useNewUrlParser: true, useUnifiedTopology: true });
 
@@ -52,5 +54,18 @@ app.get("/", async (req, res) => {
     const files = await FileModel.find();
     res.render("index", { files });
 });
+// Delete FIles
+app.post("/delete/:id", async (req, res) => {
+    console.log(req.body)
+    const { id } = req.body; // Get _id from request body
+
+    try {
+        const result = await cloudinary.uploader.destroy(id);
+        console.log(result);
+        res.json({ success: true, message: "Image deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Failed to delete image", error });
+    }
+})
 
 app.listen(3000, () => console.log("Server running on port 3000"));
